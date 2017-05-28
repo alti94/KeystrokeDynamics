@@ -8,6 +8,7 @@ import weka.core.Instances;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -18,16 +19,22 @@ public class Classification {
         this.dataSetsFromFiles = dataSetsFromFiles;
     }
 
-    public void start(FeatureVector currentTyping) {
-        List<String> names = dataSetsFromFiles.stream()
-                .map(DataSet::getBaseName)
-                .collect(Collectors.toList());
+    public Optional<Integer> start(FeatureVector currentTyping) {
+        List<String> names = getNames();
         ArrayList<Attribute> attributes = createAttributes(names);
 
-        Instances[] dataSets = new Instances[names.size()];
+        Instances dataSet = new Instances("letters", attributes,
+                dataSetsFromFiles.get(i).getFeatureVectors().size());
+
+        for (int g = 0; g < dataSetsFromFiles.size(); g++) {
+            for (int s = 0; s < dataSetsFromFiles.get(g).getFeatureVectors().size(); s++) {
+
+            }
+        }
+
+        dataSet.setClassIndex(26);
         for (int i = 0; i < names.size(); i++) {
-            int[] countPerPerson = new int[dataSetsFromFiles.get(i).getFeatureVectors().size()];
-            Instances dataSet = new Instances("letters", attributes, 27);
+
 
             for (FeatureVector featureVector : dataSetsFromFiles.get(i).getFeatureVectors()) {
                 DenseInstance data = new DenseInstance(27);
@@ -40,40 +47,35 @@ public class Classification {
                 dataSet.add(data);
             }
 
-            dataSet.setClassIndex(26);
+
             dataSets[i] = dataSet;
         }
 
-        Classifier ibk = new IBk(10);
+        Instances currentDataSet = new Instances("letters", attributes, 1);
+        DenseInstance denseInstance = new DenseInstance(27);
+        for (int d = 0; d < 26; d++) {
+            denseInstance.setValue(d, currentTyping.getLetterPressTime().get(d));
+        }
+        currentDataSet.add(denseInstance);
+        currentDataSet.setClassIndex(26);
+
+        Classifier ibk = new IBk(1);
         try {
-            ibk.buildClassifier(dataSets[0]);
+            ibk.buildClassifier(dataSets[1]);
+            return Optional.of((int) ibk.classifyInstance(currentDataSet.instance(0)));
         } catch (Exception e) {
             e.printStackTrace();
+            return Optional.empty();
         }
-        int dataSetSize = dataSets[0].size();
-
-
-//                for (int instanceNumber = 0; instanceNumber < datasetSize; instanceNumber++) {
-//                    Instance test = datasets[d].instance(instanceNumber);
-//                    datasets[d].remove(instanceNumber);
-//
-//                    Classifier ibk = new IBk(k);
-//                    ibk.buildClassifier(datasets[d]);
-//                    int classification = (int) ibk.classifyInstance(test);
-//                    //System.out.println(k + ", " + instanceNumber + ": " + ibk.classifyInstance(test));
-//                    if (classification != (instanceNumber / (datasetSize / names.size()))) {
-//                        //System.out.println(k + ", " + instanceNumber + ", " + test);
-//                        errors++;
-//                    }
-//
-//                    datasets[d].add(instanceNumber, test);
-//                }
-//                System.out.println("K: " + k + ", errors = " + errors + "/" + datasetSize + " (" + (100.0 * errors / datasetSize) + "%)");
-//            }
     }
 
+    private List<String> getNames() {
+        return dataSetsFromFiles.stream()
+                .map(DataSet::getBaseName)
+                .collect(Collectors.toList());
+    }
 
-    public ArrayList<Attribute> createAttributes(List<String> names) {
+    private ArrayList<Attribute> createAttributes(List<String> names) {
         ArrayList<Attribute> attributes = new ArrayList<>(27);
 
         IntStream.rangeClosed(0, 25).forEach(value -> {
