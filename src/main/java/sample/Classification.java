@@ -21,37 +21,24 @@ public class Classification {
 
     public Optional<Integer> start(FeatureVector currentTyping) {
         List<String> names = getNames();
-        ArrayList<Attribute> attributes = createAttributes(names);
 
-        Instances dataSet = new Instances("letters", attributes,
-                dataSetsFromFiles.get(i).getFeatureVectors().size());
+        Instances dataSets = new Instances("letters", createAttributes(names), countSamples());
 
-        for (int g = 0; g < dataSetsFromFiles.size(); g++) {
-            for (int s = 0; s < dataSetsFromFiles.get(g).getFeatureVectors().size(); s++) {
-
-            }
-        }
-
-        dataSet.setClassIndex(26);
-        for (int i = 0; i < names.size(); i++) {
-
-
-            for (FeatureVector featureVector : dataSetsFromFiles.get(i).getFeatureVectors()) {
-                DenseInstance data = new DenseInstance(27);
+        for (DataSet dataSet : dataSetsFromFiles) {
+            for (FeatureVector featureVector : dataSet.getFeatureVectors()) {
+                DenseInstance sample = new DenseInstance(27);
                 for (int d = 0; d < 26; d++) {
-                    data.setValue(i, featureVector.getLetterPressTime().get(i));
+                    sample.setValue(d, featureVector.getLetterPressTime().get(d));
                 }
 
                 Attribute nameAttribute = new Attribute("name", names, 26);
-                data.setValue(nameAttribute, dataSetsFromFiles.get(i).getBaseName());
-                dataSet.add(data);
+                sample.setValue(nameAttribute, dataSet.getBaseName());
+                dataSets.add(sample);
             }
-
-
-            dataSets[i] = dataSet;
         }
+        dataSets.setClassIndex(26);
 
-        Instances currentDataSet = new Instances("letters", attributes, 1);
+        Instances currentDataSet = new Instances("letters", createAttributes(names), 1);
         DenseInstance denseInstance = new DenseInstance(27);
         for (int d = 0; d < 26; d++) {
             denseInstance.setValue(d, currentTyping.getLetterPressTime().get(d));
@@ -61,12 +48,23 @@ public class Classification {
 
         Classifier ibk = new IBk(1);
         try {
-            ibk.buildClassifier(dataSets[1]);
+            ibk.buildClassifier(dataSets);
             return Optional.of((int) ibk.classifyInstance(currentDataSet.instance(0)));
         } catch (Exception e) {
             e.printStackTrace();
             return Optional.empty();
         }
+    }
+
+    private int countSamples() {
+        int size = 0;
+        for (DataSet dataSet : dataSetsFromFiles) {
+            for (FeatureVector featureVector : dataSet.getFeatureVectors()) {
+                size += 1;
+            }
+        }
+
+        return size;
     }
 
     private List<String> getNames() {
