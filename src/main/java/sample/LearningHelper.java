@@ -7,22 +7,30 @@ import java.util.List;
 
 public class LearningHelper {
     private List<Pair<Character, Integer>> letters;
-    private char currentlyPressedLetter;
-    private long currentlyPressedLetterStartTime;
+    private boolean[] currentlyPressedLetter = new boolean[26];
+    private long[] currentPressedLetterTimes = new long[26];
 
     public LearningHelper() {
         letters = new ArrayList<>();
     }
 
     public void keyPressed(char letter) {
-        currentlyPressedLetter = letter;
-        currentlyPressedLetterStartTime = System.currentTimeMillis();
+        int id = letter - 'A';
+
+        if (!currentlyPressedLetter[id]) {
+            currentlyPressedLetter[id] = true;
+            currentPressedLetterTimes[id] = System.currentTimeMillis();
+        }
     }
 
-    public void keyReleased() {
-        Integer pressTime = Math.toIntExact(System.currentTimeMillis() -
-                currentlyPressedLetterStartTime);
-        letters.add(new Pair<>(currentlyPressedLetter, pressTime));
+    public void keyReleased(char letter) {
+        int id = letter - 'A';
+
+        currentlyPressedLetter[id] = false;
+
+        int pressTime = (int)(System.currentTimeMillis() -
+                currentPressedLetterTimes[id]);
+        letters.add(new Pair<>(letter, pressTime));
     }
 
     public List<Pair<Character, Integer>> getKeysAndTimes() {

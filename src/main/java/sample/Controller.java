@@ -52,15 +52,12 @@ public class Controller {
     }
 
     public void stopLearning(ActionEvent actionEvent) {
-        learningStarted = false;
-        changeUiState();
-
         Optional<String> name = askForFileName();
 
-        CompletableFuture.runAsync(() -> {
-            new DatabaseSaver().save(learningHelper.getKeysAndTimes(),
-                    name.orElse("unknown 1"));
-        });
+        new DatabaseSaver().save(learningHelper.getKeysAndTimes(),
+                name.orElse("unknown 1"));
+
+        reset();
     }
 
     public void identify(ActionEvent actionEvent) {
@@ -79,6 +76,18 @@ public class Controller {
         } else {
             displayErrorMessage();
         }
+
+        reset();
+    }
+
+    private void reset() {
+        learningStarted = false;
+        changeUiState();
+        learningTextArea.clear();
+
+        learningHelper = new LearningHelper();
+        readDatabaseAsync = CompletableFuture.supplyAsync(() ->
+                new DatabaseReader().read());
     }
 
     private void displayResult(Integer nameId) {
@@ -124,7 +133,10 @@ public class Controller {
 
     public void learningKeyReleased(KeyEvent keyEvent) {
         if (learningStarted) {
-            learningHelper.keyReleased();
+            if (keyEvent.getCode().isLetterKey()) {
+                char letter = keyEvent.getCode().getName().toUpperCase().charAt(0);
+                learningHelper.keyReleased(letter);
+            }
         }
     }
 }
