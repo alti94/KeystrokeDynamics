@@ -46,7 +46,7 @@ public class Classification {
         currentDataSet.add(denseInstance);
         currentDataSet.setClassIndex(26);
 
-        Classifier ibk = new IBk(1);
+        Classifier ibk = new IBk(6);
         try {
             ibk.buildClassifier(dataSets);
             return Optional.of((int) ibk.classifyInstance(currentDataSet.instance(0)));
