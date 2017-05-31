@@ -7,9 +7,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.KeyEvent;
+import sample.database.CsvExport;
 import sample.database.DatabaseReader;
 import sample.database.DatabaseSaver;
+import weka.core.converters.CSVSaver;
 
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -37,6 +40,8 @@ public class Controller {
 
         learningStarted = false;
         learningHelper = new LearningHelper();
+
+        CsvExport.export(new File("export.csv"));
     }
 
     public void startLearning(ActionEvent actionEvent) {
