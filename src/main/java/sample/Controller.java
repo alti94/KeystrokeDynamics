@@ -10,7 +10,6 @@ import javafx.scene.input.KeyEvent;
 import sample.database.CsvExport;
 import sample.database.DatabaseReader;
 import sample.database.DatabaseSaver;
-import weka.core.converters.CSVSaver;
 
 import java.io.File;
 import java.util.List;
